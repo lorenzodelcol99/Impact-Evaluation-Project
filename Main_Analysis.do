@@ -354,7 +354,34 @@ tabstat yrbrn, by(cntry) statistics(mean sd n) columns(statistics) format(%9.2f)
 
 
 
+tabulate gndr if cntry == "IT"
 
+// we see that there is "9" which means "No Answare", need to clean it
+
+// replace gndr = . if gndr == 9
+
+tabulate gndr if cntry == "IT"
+
+// save "$clean/ESS_clean.dta", replace
+
+
+
+// Now we want to sumarise Gender variable with countries
+
+tabulate gndr essround if cntry == "IT", column
+
+// I want to create the MALE dummy
+
+// creating an empty variable
+generate male = .
+
+// assigning 1 for males
+replace male = 1 if gndr == 1
+
+// assigning 0 for females
+replace male = 0 if gndr == 0
+
+tabulate gndr
 
 
 
