@@ -60,6 +60,80 @@ replace trstlgl = . if inlist(trstlgl, 77, 88, 99)
 tabulate domicil
 replace domicil = . if inlist(domicil, 7, 8, 9)
 
+// I. Preferred decision level of immigration and refugees policies
+// dclmig "Preferred decision level of immigration and refugees policies"
+// "1= International Level, 2=European Level, 3=National, 4= Regional or local" --> indicating 3 or 4 could be seen as proxy towards "populism(?)"
+tabulate dclmig if cntry == "IT"
+replace dclmig = . if inlist(dclmig, 7, 8, 9)
+
+// J. dmcntov
+// How democratic do you think [country] is overall? Choose your answer from this card where 0 is not at all democratic and 10 is completely democratic.
+tabulate dmcntov
+replace dmcntov = . if inlist(dmcntov, 77, 88, 99)
+
+// K. euftf 
+// European Union: European unification go further or gone too far
+tabulate euftf
+replace euftf = . if inlist(euftf, 77, 88, 99)
+
+// L. freehms 
+// Gays and lesbians free to live life as they wish
+// 1 strongly agree, 5 Strongly disagree
+tabulate freehms
+replace freehms = . if inlist(freehms, 7, 8, 9)
+
+// M. gincdif
+// Government should reduce differences in income levels
+// 1 strongly agree, 5 Strongly disagree
+tabulate gincdif
+replace gincdif = . if inlist(gincdif, 7, 8, 9)
+
+// N. hmsacld 
+// Gay and lesbian couples right to adopt children
+tabulate hmsacld
+replace hmsacld = . if inlist(hmsacld, 7, 8, 9)
+
+// N. hmsfmlsh 
+// Ashamed if close family member gay or lesbian
+tabulate hmsfmlsh
+replace hmsfmlsh = . if inlist(hmsfmlsh, 7, 8, 9)
+
+// O. implvdm 
+// How important for you to live in democratically governed country
+tabulate implvdm
+replace implvdm = . if inlist(implvdm, 77, 88, 99)
+
+// P. polintr 
+// How interested in politics
+// 1 very interest, 4 not interest at all
+tabulate polintr
+replace polintr = . if inlist(polintr, 7, 8, 9)
+
+// R. prtyban
+// Ban political parties that wish overthrow democracy
+// 1 strongly agree, 5 disagree strongly
+tabulate prtyban
+replace prtyban = . if inlist(prtyban, 7, 8, 9)
+
+// S. stfdem
+// How satisfied with the way democracy works in country
+// 0 extrimely dissatisfied, 10 Extrimely satisfied
+tabulate stfdem
+replace stfdem = . if inlist(stfdem, 77, 88, 99)
+
+
+// T. stfedu
+// State of education in country nowadays
+// 0 extrimely bad, 10 Extrimely good
+tabulate stfedu
+replace stfedu = . if inlist(stfedu, 77, 88, 99)
+
+
+// U. vote 
+// Voted last national election
+// 1 yes, 2 no --> to convert it in Dummy
+tabulate vote
+replace vote = . if inlist(vote, 7, 8, 9)
 
 // =========================================================
 // --- 3. VARIABLE CREATION ---
@@ -69,6 +143,12 @@ replace domicil = . if inlist(domicil, 7, 8, 9)
 generate male = .
 replace male = 1 if gndr == 1
 replace male = 0 if gndr == 2 // Fixed: Females are coded as 2 in ESS
+
+// Generating the Vote 1 = Yes, 0 = No
+generate vote_dummy = .
+replace vote_dummy = 1 if vote == 1
+replace vote_dummy = 0 if vote == 2
+tabulate vote_dummy
 
 
 // Generating the Policy Variables
@@ -109,10 +189,6 @@ replace post = 1 if (yrbrn >= pivotal_cohort) & !missing(pivotal_cohort)
 
 // Verify that the Dummy works
 tabulate yrbrn post if cntry == "IT"
-
-
-
-
 
 
 
@@ -212,12 +288,438 @@ preserve
 restore
 
 
+//////////////////////////////////////////////////////////////////////////
+//  6                Plotting DiD Graphs                      //
+//////////////////////////////////////////////////////////////////////////
+// Using trstpltTrust in politicians as dependent variable, just to build the workhorse
+
+// 6.1 Italy in Isolation (trstplt)
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(trstplt, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) trstplt, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line trstplt yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line trstplt yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Trust in Politicians by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+//Saving the graph
+graph export "$Output/DiD_Graph_Italy.png", replace width(2000)
+
+
+
+//// Trying with --> dclmig "Preferred decision level of immigration and refugees policies"
+// "1= International Level, 2=European Level, 3=National, 4= Regional or local" --> indicating 3 or 4 could be seen as proxy towards "populism(?)"
+
+// 6.1 Italy in Isolation
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(dclmig, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) dclmig, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line dclmig yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line dclmig yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Prefered decision level of Immigraziona nd Refugees Policies by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+
+// Trying --> dmcntov --> Democratic level, as it is, a snapshot
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(dmcntov, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) dmcntov, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line dmcntov yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line dmcntov yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Democratic Level by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+// Trying --> euftf --> European Union: European unification go further or gone too far
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(euftf, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) euftf, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line euftf yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line euftf yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("European unification go further or gone too far? by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+// Trying --> euftf --> European Union: European unification go further or gone too far In GERMANY
+preserve
+	keep if cntry == "DE"
+	
+	// dropping missing values
+	drop if missing(euftf, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1980 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) euftf, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line euftf yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line euftf yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1994, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("European unification go further or gone too far? by Birth Cohort (Germany)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1994)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+
+// Trying --> freehms --> Gays and lesbians free to live life as they wish
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(freehms, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) freehms, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line freehms yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line freehms yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Gays and lesbians free to live life as they wish by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+// Trying --> gincdif --> Government should reduce differences in income levels
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(gincdif, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) gincdif, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line gincdif yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line gincdif yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Government should reduce differences in income levels by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
 
 
 
 
 
+// Trying --> hmsacld --> Gay and lesbian couples right to adopt children
 
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(hmsacld, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) hmsacld, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line hmsacld yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line hmsacld yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Gay and lesbian couples right to adopt children by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+
+// Trying --> hmsfmlsh --> Ashamed if close family member gay or lesbian
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(hmsfmlsh, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) hmsfmlsh, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line hmsfmlsh yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line hmsfmlsh yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Ashamed if close family member gay or lesbian by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+// Trying --> implvdm --> How important for you to live in democratically governed country
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(implvdm, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) implvdm, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line implvdm yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line implvdm yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("How important for you to live in democratically governed country by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+
+// Trying --> polintr --> How interested in politics
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(polintr, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) polintr, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line polintr yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line polintr yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("How interested in politics by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+// Trying --> prtyban --> Ban political parties that wish overthrow democracy
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(prtyban, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) prtyban, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line prtyban yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line prtyban yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Ban political parties that wish overthrow democracy by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+// Trying --> stfdem --> How satisfied with the way democracy works in country
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(stfdem, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) stfdem, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line stfdem yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line stfdem yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("How satisfied with the way democracy works in country by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+// Trying --> stfedu --> State of education in country nowadays
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(stfedu, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) stfedu, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line stfedu yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line stfedu yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("State of education in country nowadays by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
+
+
+
+// Trying --> tabulate vote_dummy --> Voted last national election
+preserve
+	keep if cntry == "IT"
+	
+	// dropping missing values
+	drop if missing(vote_dummy, yrbrn, male)
+	
+	// zooming in a window of cohorts around the reform (1987)
+	keep if yrbrn >= 1970 & yrbrn <= 2000
+	
+	// calculate the average trust per birth year, separate by gender
+	collapse (mean) vote_dummy, by(yrbrn male)
+	
+	//Plot the DiD Graph
+	twoway ///
+		(line vote_dummy yrbrn if male == 1, lcolor(navy) lwidth(medthick)) ///
+		(line vote_dummy yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
+		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
+		title("Voted last national election by Birth Cohort (Italy)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		ytitle("Year of Birth") ///
+		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
+		graphregion(color(white))
+		
+restore
 
 
 
