@@ -4,3 +4,5 @@
 *.csv
 ESS Dataset/
 ESS_Dataset/
+*.stswp
+.DS_Store
