@@ -240,6 +240,39 @@ tabulate male essround if cntry == "IT", column
 // 
 
 
+///////////////////////////////////////////////////////////////////////////////////
+// ----- 4 Trying to run som DiD regressions, Callaway ans Sant'Anna estimator ----
+///////////////////////////////////////////////////////////////////////////////////
+
+// It seems that if I use the CS estimator I migth have problems by using it as it is. I need to modify the variables, I need to create a "gender gap" --> the difference between man and women for the variable of interest
+
+// by creating the Gap between man and women in the the dependent varaible we are solving the problem with the CS estimator, and building the event study graph!
+
+// Boh, mi sono perso, bisogna ragioanrci su, vediamo in seguito.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ITALY
 // Trying --> freehms --> Gays and lesbians free to live life as they wish
@@ -303,6 +336,9 @@ restore
 /// GEMINI dice correttamente, If I use all the dataset, also countries wich never abolished the military service, I will have missing values in the "distance" from treatment varaible as these countries do not have the "pivotal cohort" (as already said, they never abolished the mandatory military service)
 // we need to think how to overcome to this problem if we go DDD
 
+// Dani Invece risponde --> il problema che segnali non c'è in un DDD. Puoi semplicemente usare un codice che ti dica:  gen post = year_birth >= pivotal_cohort if treated_country == 1
+// replace post = 0 if treated_country == 0
+
 // Pensare a event study graph
 
 // TRIPLE DID --> DDD
@@ -311,6 +347,10 @@ restore
 // Dobbiamo pensare se questa assumptuon regarding the oarallel trend is to huge
 // stiamo dicendo che le differenze di trend, tra unomini e donne, prima della riforma sono comuni tra paesi che poi hanno effettuato la riforma e paesi che non l'hanno mai effettuata
 // Bisogna forse (il trattamento è la riforma), occhio a non inserire nel campione paesi che NON hanno MAI avuto la leva militare obbligatoria.
+
+
+// il problema che segnali non c'è in un DDD. Puoi semplicemente usare un codice che ti dica:  gen post = year_birth >= pivotal_cohort if treated_country == 1
+// replace post = 0 if treated_country == 0
 
 
 
