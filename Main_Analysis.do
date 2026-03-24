@@ -517,7 +517,7 @@ preserve
 		(line hmsacld yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
 		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
 		title("Gay and lesbian couples right to adopt children by Birth Cohort (Italy)") ///
-		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1986)") ///
 		ytitle("Year of Birth") ///
 		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
 		graphregion(color(white))
@@ -546,7 +546,7 @@ preserve
 		(line hmsfmlsh yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
 		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
 		title("Ashamed if close family member gay or lesbian by Birth Cohort (Italy)") ///
-		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1986)") ///
 		ytitle("Year of Birth") ///
 		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
 		graphregion(color(white))
@@ -573,7 +573,7 @@ preserve
 		(line implvdm yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
 		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
 		title("How important for you to live in democratically governed country by Birth Cohort (Italy)") ///
-		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1986)") ///
 		ytitle("Year of Birth") ///
 		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
 		graphregion(color(white))
@@ -602,7 +602,7 @@ preserve
 		(line polintr yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
 		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
 		title("How interested in politics by Birth Cohort (Italy)") ///
-		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1986)") ///
 		ytitle("Year of Birth") ///
 		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
 		graphregion(color(white))
@@ -630,7 +630,7 @@ preserve
 		(line prtyban yrbrn if male == 0, lcolor(cranberry) lwidth(medthick)), ///
 		xline(1987, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
 		title("Ban political parties that wish overthrow democracy by Birth Cohort (Italy)") ///
-		subtitle("Dashed line = First cohort expemt from military service draft (1987)") ///
+		subtitle("Dashed line = First cohort expemt from military service draft (1986)") ///
 		ytitle("Year of Birth") ///
 		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
 		graphregion(color(white))
@@ -720,6 +720,47 @@ preserve
 		graphregion(color(white))
 		
 restore
+
+
+
+
+// Per cercare la la variabile d'interesse ---> Prendere tutti i potenziali outcome cui ho pensate e testare i pre-trend, faccio girare le regressione DiD sulle coorti non trattate, aggregato per tutti i paesi. 
+// 
+
+// In generale devo fare
+// Post = 1 if year of birth >= Pivotal cohort
+// Distance from pivotal cohort (year of birth - pivotal_cohort) (numeri negativi, gente che non è stata esposta alla leva militare)
+// pensare a controlli che non debbano influenzare la variabile dipendente pre treatment
+
+// Pensare a event study graph
+
+// TRIPLE DID --> DDD
+// utilizzare il fatto che un paese abbia abolito o mai abolito la leva militare
+// Dummy che dice "abolished at a ceirtan time" vs "never abolished"
+// Dobbiamo pensare se questa assumptuon regarding the oarallel trend is to huge
+// stiamo dicendo che le differenze di trend, tra unomini e donne, prima della riforma sono comuni tra paesi che poi hanno effettuato la riforma e paesi che non l'hanno mai effettuata
+// Bisogna forse (il trattamento è la riforma), occhio a non inserire nel campione paesi che NON hanno MAI avuto la leva militare obbligatoria.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
