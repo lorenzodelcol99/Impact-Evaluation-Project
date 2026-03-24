@@ -135,8 +135,72 @@ replace stfedu = . if inlist(stfedu, 77, 88, 99)
 tabulate vote
 replace vote = . if inlist(vote, 7, 8, 9)
 
-// V. 
+// V. FATHER OCCUPATION ehn you were 14 years old
+// --> recall that is a categorical variables
+tabulate occf14
+tabulate occf14a
+tabulate occf14b // option b hase 245k observations
 
+// It seems that, they have the same variable/question saved in three different variables for different waves, we do not like that, let's aggregate everything
+// combining the observations
+generate fthr_educ_14 = .
+replace fthr_educ_14 = occf14 if !missing(occf14)
+tabulate fthr_educ_14
+replace fthr_educ_14 = occf14a if !missing(occf14a)
+tabulate fthr_educ_14
+replace fthr_educ_14 = occf14b if !missing(occf14b)
+tabulate fthr_educ_14
+
+tabulate yrbrn
+// Perfect, it seems that now for almost all the individuals that we have in the ESS dataset respondend to this answare. now we need to clean it
+
+replace fthr_educ_14 = . if inlist(fthr_educ_14, 66, 77, 88, 99)
+tabulate fthr_educ_14
+
+// W. Mother OCCUPATION ehn you were 14 years old
+// --> recall that is a categorical variables
+tabulate occm14
+tabulate occm14a
+tabulate occm14b
+generate mthr_educ_14 = .
+replace mthr_educ_14 = occm14 if !missing(occm14)
+tabulate mthr_educ_14
+replace mthr_educ_14 = occm14a if !missing(occm14a)
+tabulate mthr_educ_14
+replace mthr_educ_14 = occm14b if !missing(occm14b)
+tabulate mthr_educ_14
+
+replace mthr_educ_14 = . if inlist(mthr_educ_14, 66, 77, 88, 99)
+tabulate mthr_educ_14
+
+// Recall that 2.W Mother educ at 14 has 270k relevant observations, whereas man have 175k 
+
+// X. Father EMPLOYEMENT status wehn you were 14 years old
+// --> recall that is a categorical variables, 1 Employee, 2 self employed, not working, 4 fatherdead/absent
+tabulate emprf14
+replace emprf14 = . if inlist(emprf14, 7, 8, 9)
+tabulate emprf14
+
+// Y. Mother EMPLOYEMENT status wehn you were 14 years old
+// --> recall that is a categorical variables, 1 Employee, 2 self employed, not working, 4 mother dead/absent
+tabulate emprm14
+replace emprm14 = . if inlist(emprm14, 7, 8, 9)
+tabulate emprm14
+
+// Z. Was the father born in the country?
+tabulate facntr
+replace facntr = . if inlist(facntr, 7, 8, 9)
+tabulate facntr
+
+// A.1 Was the father born in the country?
+tabulate mocntr
+replace mocntr = . if inlist(mocntr, 7, 8, 9)
+tabulate mocntr
+ 
+// A.2 Belong to a minority ethnic group in country.
+tabulate blgetmg
+replace blgetmg = . if inlist(blgetmg, 7, 8, 9)
+tabulate blgetmg
 
 // =========================================================
 // --- 3. VARIABLE CREATION ---
@@ -310,6 +374,32 @@ esttab using "$Output/Stargazer_Style_Table.rtf", replace ///
 // I neeed the controls taht vary within a specific country AND whidin a specific birth cohord AND between man and women
 // whatever could describe the responden't life before they turned 18
 ////////// /////////// /////////// ///////////////////// /////////// ////////////
+
+// Good news, in the "ESS.html" file we can find all the variables included in this big survey. A good thing is that there is a full set of questions that are made such that the respondent need to recall the times when he was 14 years old, that's gold for our analysis!
+
+// Parental occupationa and employement status when the respondend where 14 years old
+// Parental background; education and country of birth of parents
+// Immutable traits of the individual: born in country, nelonging to a minority or etchnic group in the country
+
+
+// CHECK 2 (data cleaing) At point V and W to see what have we done regarding the father and mother edcation variable when the respondent were 14 years old
+// Recall that 2.W Mother educ at 14 has 270k relevant observations, whereas 2.V man have 175k 
+
+
+reghdfe freehms i.male##i.post_treatment edulvlfa edulvlma fthr_educ_14 mthr_educ_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+
+// GOOD NEWS, it works greatly
+
+
+
+
+
+
+
+
+
+
+
 
 
 	
