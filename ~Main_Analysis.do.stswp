@@ -135,6 +135,9 @@ replace stfedu = . if inlist(stfedu, 77, 88, 99)
 tabulate vote
 replace vote = . if inlist(vote, 7, 8, 9)
 
+// V. 
+
+
 // =========================================================
 // --- 3. VARIABLE CREATION ---
 // =========================================================
@@ -244,27 +247,86 @@ tabulate male essround if cntry == "IT", column
 // ----- 4 Trying to run som DiD regressions, Callaway ans Sant'Anna estimator ----
 ///////////////////////////////////////////////////////////////////////////////////
 
-// It seems that if I use the CS estimator I migth have problems by using it as it is. I need to modify the variables, I need to create a "gender gap" --> the difference between man and women for the variable of interest
-
-// by creating the Gap between man and women in the the dependent varaible we are solving the problem with the CS estimator, and building the event study graph!
-
-// Boh, mi sono perso, bisogna ragioanrci su, vediamo in seg
-
-
+// Isntalling the required packages in order to be able to perform the FE and DiD regressions
+// ssc install reghdfe, replace
+// ssc install ftools, replace
+// To make good tables to export, install the following
+// ssc install estout, replace
 
 
+// reghdfe [Y] [The DiD Variables] [Covariates] , absorb([Fixed Effects]) cluster([Cluster SE])
+// reghdfe [freehms] [i.male##i.post_treatment] [edulvlfa] , absorb(cntry yrbrn) cluster(cntry)
+
+// $$Y_{ict} = \alpha + \beta_1 Male_i + \beta_2 Post_{ct} + \beta_{DiD} (Male_i \times Post_{ct}) + \gamma X_{ict} + \mu_c + \lambda_t + \epsilon_{ict}$$
+
+// by writing i.male##i.post I'm telling stata that I'm estimating a DiD model
+// When I include something in the absorb section, that is the fixed effect section, I am allowing the equation to compare just individuals from the same country, year (cohort) and so on.
+
+// 1. Let's run the first regression and store it
+reghdfe freehms i.male##i.post_treatment edulvlfa edulvlma, absorb(cntry yrbrn) cluster(cntry)
 
 
+// 2. Export the table
 
 
+// 1. Clear the whiteboard
+eststo clear
+
+// 2. Run Model 1 (Baseline DiD) - 'quietly' just stops it from cluttering your screen
+quietly eststo: reghdfe freehms i.male##i.post_treatment, absorb(cntry yrbrn) cluster(cntry)
+
+// 3. Run Model 2 (Adding Father's Education)
+quietly eststo: reghdfe freehms i.male##i.post_treatment edulvlfa, absorb(cntry yrbrn) cluster(cntry)
+
+// 4. Run Model 3 (Adding Mother's Education)
+quietly eststo: reghdfe freehms i.male##i.post_treatment edulvlfa edulvlma, absorb(cntry yrbrn) cluster(cntry)
+
+// 5. The "Stargazer" Style Export to Word
+esttab using "$Output/Stargazer_Style_Table.rtf", replace ///
+    label ///
+    se b(3) se(3) ///
+    star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(1.male#1.post_treatment 1.male 1.post_treatment edulvlfa edulvlma) ///
+    order(1.male#1.post_treatment) ///
+    mtitle("Baseline" "+ Father Edu" "+ Both Parents") /// <-- Column Titles!
+    scalars("N Observations" "r2_within Within R-sq.") /// <-- Adds the summary stats at the bottom!
+    title("Table 1: Effect of Draft Abolition on Tolerance wrt Gay and Lesbians") ///
+    addnotes("Standard errors in parentheses. Clustered at the country level.")
+
+	
+/// Now we want to focus on the different types of controls that we could insert in the DiD regression.
+// We need to keep in mind the bad control problem, that is, that the controls that we insert need to be determined/occured before the treatment "event" happened, need to be orthogonal to DiD event, an example is parental education, at the time of the eligibility of military service (when a men is 18 years old) is already determined, and cannot be changed/modified because of the treatment.
+	
+// Our rule of thumb for deciding the goodnes/plausability of the control is the following: 
+// 		--> "was this variable determined BEFORE the individuals turned 18?"
+// If yes could be a control, if no will bprobably be a bad controlli
+
+// we should NOT include, 1) years of education of the respndent as it is endogenous with draft eligibility	2) Income/Employement, military service delayes the entry in the labour market, which affects lifelong earnings 3) Marital status, being drafted migth delay marriage 4) Current religioisty/ Political Affiliation
+// --> keep in mind that bad controls can typically be possibile alternatives dependent variables
+
+// GEMINI Suggest that, when we are adding COUNTRY and YEAR of BIRTH fixed effects we are controlling for everything that is constantly differenc between different countries and different generations (and that is a lot of stuff)
+	
+////////// /////////// So what we should add as controls? /////////// /////////// 
+// I neeed the controls taht vary within a specific country AND whidin a specific birth cohord AND between man and women
+// whatever could describe the responden't life before they turned 18
+////////// /////////// /////////// ///////////////////// /////////// ////////////
 
 
+	
+// Questa non funziona del tutto, significativo ma quando vado ad inserire dei controlli necessari la regressione non gira
+tabulate hmsacld
+// hmsacld --> Gay and lesbian couples right to adopt children
+// 1 strongly agree --> 5 strongly disagree
+reghdfe hmsacld i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// Similar effect wrt to the previuos regression. The abolition of the mandatory military service seems that had a positive and significant impact on the level of NON tolerance towards gay and lesbians rigths to adobt childrens. The problem is that, If I control for parets' top level of education, the regression dies out, it will not run
+	
 
 
-
-
-
-
+/// 
+	
+	
+	
+	
 
 
 
