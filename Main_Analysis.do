@@ -440,19 +440,75 @@ reghdfe hmsacld i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
 ////////////////   TESTING FOR PRE TRENDS --> TOWARDS EVENT STUDY     ////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 
-// now, we need to create the event time variable
+// 1. Create the base event time variable
+capture drop event_time
 generate event_time = dstnc_frm_pvtl_cohort
 
+// 2. Cap the ends at -10 and +10 (TYPO FIXED!)
+replace event_time = -10 if event_time <= -10
+replace event_time = 10 if event_time >= 10
+
+// 3. THE TIME SHIFT: Add 15 to make all numbers strictly positive
+capture drop time_pos
+generate time_pos = event_time + 15
+
+// (Math check: Your baseline Year -1 is now 14)
+
+// 4. Run the Event Study Regression
+// Notice we use ib14.time_pos to set the new baseline
+reghdfe freehms i.male##ib14.time_pos edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+
+// If the code here works in the rigth way, we have perfectly tested the pre trend assumprion,the pre trend seems to be parallel!
+
+
+// Let's plot the event study
+// ssc install coefplot, replace
+
+// (Make sure you just ran your reghdfe command right before this!)
+coefplot, ///
+    keep(1.male#*.time_pos) ///  <-- Tells it to ONLY graph your DiD interaction terms
+    baselevels omitted ///       <-- Forces it to plot your reference year (-1) at exactly zero
+    vertical ///                 <-- Flips the graph so time goes left-to-right on the X-axis
+    yline(0, lcolor(black) lpattern(solid)) /// <-- Draws a solid black line at zero effect
+    xline(10.5, lcolor(red) lpattern(dash)) /// <-- Draws a red dashed vertical line between Year -1 and Year 0
+    ciopts(recast(rcap) color(gs7)) /// <-- Makes the confidence intervals look like clean error bars
+    msymbol(O) mcolor(navy) ///  <-- Makes the dots navy blue circles
+    coeflabels( ///              <-- This translates the "time_pos" back to actual Event Years!
+        1.male#5.time_pos = "-10" ///
+        1.male#6.time_pos = "-9" ///
+        1.male#7.time_pos = "-8" ///
+        1.male#8.time_pos = "-7" ///
+        1.male#9.time_pos = "-6" ///
+        1.male#10.time_pos = "-5" ///
+        1.male#11.time_pos = "-4" ///
+        1.male#12.time_pos = "-3" ///
+        1.male#13.time_pos = "-2" ///
+        1.male#14.time_pos = "-1" ///
+        1.male#15.time_pos = "0" ///
+        1.male#16.time_pos = "1" ///
+        1.male#17.time_pos = "2" ///
+        1.male#18.time_pos = "3" ///
+        1.male#19.time_pos = "4" ///
+        1.male#20.time_pos = "5" ///
+        1.male#21.time_pos = "6" ///
+        1.male#22.time_pos = "7" ///
+        1.male#23.time_pos = "8" ///
+        1.male#24.time_pos = "9" ///
+        1.male#25.time_pos = "10" ///
+    ) ///
+    xtitle("Years Since Abolition of Mandatory Draft") ///
+    ytitle("Difference in Tolerance (Men vs. Women)") ///
+    title("Event Study: Effect of Draft Abolition on Tolerance (freehms)") ///
+    note("95% Confidence Intervals shown. Reference year is -1.")
+
+
+// I pre trend vanno bene, ma dal grafico sembra che l'effetto trovato nel DiD precedentemente sembra non esserci. Gemini da una spiegazione riguardo all'aggregazione in 10 periodi e problemi di potenza, Boh, dice che però va tutto bene.
+
+
 
 	
 	
-
-
-
-
-
-
-
+	
 
 
 // ITALY
@@ -538,8 +594,12 @@ restore
 
 
 
+// DDD PROJECT
 
-
+// check
+// check
+// check
+// check
 
 
 
