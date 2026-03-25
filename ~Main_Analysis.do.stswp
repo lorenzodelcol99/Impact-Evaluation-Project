@@ -70,7 +70,7 @@ replace dclmig = . if inlist(dclmig, 7, 8, 9)
 // How democratic do you think [country] is overall? Choose your answer from this card where 0 is not at all democratic and 10 is completely democratic.
 tabulate dmcntov
 replace dmcntov = . if inlist(dmcntov, 77, 88, 99)
-
+ 
 // K. euftf 
 // European Union: European unification go further or gone too far
 tabulate euftf
@@ -391,13 +391,39 @@ reghdfe freehms i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_oc
 // GOOD NEWS, it works greatly
 
 
+// Other possible specifications (different outcome variable) dclmig dmcntov euftf hmsfmlsh implvdm stfdem
+
+// European Union: European unification go further or gone too far
+// 0 unification already gone too far, 10 unification go further
+reghdfe euftf i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// without controls, negative effect and statistically significant
+reghdfe euftf i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// When controlling we lose the significance
+
+// hmsfmlsh Ashamed if close family member gay or lesbian
+// 0 Agree strongly, 5 disagree strongly
+reghdfe hmsfmlsh i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// without controls, negative effect and statistically significant
+reghdfe hmsfmlsh i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// As it is the regression wont start, If we remove some variable (education of father and mother) works, the point estimate become marginally signifciant, and also the point estimate, the magnitude of the effect change and become smaller
+reghdfe hmsfmlsh i.male##i.post_treatment fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+
+
+// stfdem How satisfied with the way democracy works in country
+// 0 estrimely dissadisfied, 10 estrimely satisfied
+reghdfe stfdem i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// without controls, No effect
+reghdfe stfdem i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// We find marginal significance and a positive effect on removing the mandatory military service
 
 
 
-
-
-
-
+// gincdif --> Government should reduce differences in income levels
+// 1 strongly agree, 5 Strongly disagree
+reghdfe gincdif i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// positive but marginally signifciant effect
+reghdfe gincdif i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// losing the significance
 
 
 
@@ -509,7 +535,9 @@ restore
 
 
 
-
+//////////////////////////////////////////////////////////////////////////////////////
+////////////////   TESTING FOR PRE TRENDS --> TOWARDS EVENT STUDY     ////////////////
+//////////////////////////////////////////////////////////////////////////////////////
 
 
 
