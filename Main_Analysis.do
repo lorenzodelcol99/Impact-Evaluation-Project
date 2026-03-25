@@ -70,7 +70,7 @@ replace dclmig = . if inlist(dclmig, 7, 8, 9)
 // How democratic do you think [country] is overall? Choose your answer from this card where 0 is not at all democratic and 10 is completely democratic.
 tabulate dmcntov
 replace dmcntov = . if inlist(dmcntov, 77, 88, 99)
-
+ 
 // K. euftf 
 // European Union: European unification go further or gone too far
 tabulate euftf
@@ -143,35 +143,35 @@ tabulate occf14b // option b hase 245k observations
 
 // It seems that, they have the same variable/question saved in three different variables for different waves, we do not like that, let's aggregate everything
 // combining the observations
-generate fthr_educ_14 = .
-replace fthr_educ_14 = occf14 if !missing(occf14)
-tabulate fthr_educ_14
-replace fthr_educ_14 = occf14a if !missing(occf14a)
-tabulate fthr_educ_14
-replace fthr_educ_14 = occf14b if !missing(occf14b)
-tabulate fthr_educ_14
+generate fthr_occup_14 = .
+replace fthr_occup_14 = occf14 if !missing(occf14)
+tabulate fthr_occup_14
+replace fthr_occup_14 = occf14a if !missing(occf14a)
+tabulate fthr_occup_14
+replace fthr_occup_14 = occf14b if !missing(occf14b)
+tabulate fthr_occup_14
 
 tabulate yrbrn
 // Perfect, it seems that now for almost all the individuals that we have in the ESS dataset respondend to this answare. now we need to clean it
 
-replace fthr_educ_14 = . if inlist(fthr_educ_14, 66, 77, 88, 99)
-tabulate fthr_educ_14
+replace fthr_occup_14 = . if inlist(fthr_occup_14, 66, 77, 88, 99)
+tabulate fthr_occup_14
 
 // W. Mother OCCUPATION ehn you were 14 years old
 // --> recall that is a categorical variables
 tabulate occm14
 tabulate occm14a
 tabulate occm14b
-generate mthr_educ_14 = .
-replace mthr_educ_14 = occm14 if !missing(occm14)
-tabulate mthr_educ_14
-replace mthr_educ_14 = occm14a if !missing(occm14a)
-tabulate mthr_educ_14
-replace mthr_educ_14 = occm14b if !missing(occm14b)
-tabulate mthr_educ_14
+generate mthr_occup_14 = .
+replace mthr_occup_14 = occm14 if !missing(occm14)
+tabulate mthr_occup_14
+replace mthr_occup_14 = occm14a if !missing(occm14a)
+tabulate mthr_occup_14
+replace mthr_occup_14 = occm14b if !missing(occm14b)
+tabulate mthr_occup_14
 
-replace mthr_educ_14 = . if inlist(mthr_educ_14, 66, 77, 88, 99)
-tabulate mthr_educ_14
+replace mthr_occup_14 = . if inlist(mthr_occup_14, 66, 77, 88, 99)
+tabulate mthr_occup_14
 
 // Recall that 2.W Mother educ at 14 has 270k relevant observations, whereas man have 175k 
 
@@ -308,7 +308,7 @@ tabulate male essround if cntry == "IT", column
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-// ----- 4 Trying to run som DiD regressions, Callaway ans Sant'Anna estimator ----
+// ----- 6 Trying to run som DiD regressions, Callaway ans Sant'Anna estimator ----
 ///////////////////////////////////////////////////////////////////////////////////
 
 // Isntalling the required packages in order to be able to perform the FE and DiD regressions
@@ -386,20 +386,44 @@ esttab using "$Output/Stargazer_Style_Table.rtf", replace ///
 // Recall that 2.W Mother educ at 14 has 270k relevant observations, whereas 2.V man have 175k 
 
 
-reghdfe freehms i.male##i.post_treatment edulvlfa edulvlma fthr_educ_14 mthr_educ_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+reghdfe freehms i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
 
 // GOOD NEWS, it works greatly
 
 
+// Other possible specifications (different outcome variable) dclmig dmcntov euftf hmsfmlsh implvdm stfdem
+
+// European Union: European unification go further or gone too far
+// 0 unification already gone too far, 10 unification go further
+reghdfe euftf i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// without controls, negative effect and statistically significant
+reghdfe euftf i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// When controlling we lose the significance
+
+// hmsfmlsh Ashamed if close family member gay or lesbian
+// 0 Agree strongly, 5 disagree strongly
+reghdfe hmsfmlsh i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// without controls, negative effect and statistically significant
+reghdfe hmsfmlsh i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// As it is the regression wont start, If we remove some variable (education of father and mother) works, the point estimate become marginally signifciant, and also the point estimate, the magnitude of the effect change and become smaller
+reghdfe hmsfmlsh i.male##i.post_treatment fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+
+
+// stfdem How satisfied with the way democracy works in country
+// 0 estrimely dissadisfied, 10 estrimely satisfied
+reghdfe stfdem i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// without controls, No effect
+reghdfe stfdem i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// We find marginal significance and a positive effect on removing the mandatory military service
 
 
 
-
-
-
-
-
-
+// gincdif --> Government should reduce differences in income levels
+// 1 strongly agree, 5 Strongly disagree
+reghdfe gincdif i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
+// positive but marginally signifciant effect
+reghdfe gincdif i.male##i.post_treatment edulvlfa edulvlma fthr_occup_14 mthr_occup_14 facntr mocntr blgetmg brncntr, absorb(cntry yrbrn) cluster(cntry)
+// losing the significance
 
 
 	
@@ -412,9 +436,14 @@ reghdfe hmsacld i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
 	
 
 
-/// 
-	
-	
+//////////////////////////////////////////////////////////////////////////////////////
+////////////////   TESTING FOR PRE TRENDS --> TOWARDS EVENT STUDY     ////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+
+// now, we need to create the event time variable
+generate event_time = dstnc_frm_pvtl_cohort
+
+
 	
 	
 
@@ -503,7 +532,6 @@ restore
 
 // il problema che segnali non c'è in un DDD. Puoi semplicemente usare un codice che ti dica:  gen post = year_birth >= pivotal_cohort if treated_country == 1
 // replace post = 0 if treated_country == 0
-
 
 
 
