@@ -268,7 +268,7 @@ coefplot, ///
 // --- 8. CALLAWAY & SANT'ANNA (2021) ROBUST ESTIMATOR ---
 // ======================================================================
 
-// 1. Group Variable creation (Year of treatment, 0 for control)
+// Group Variable creation (Year of treatment, 0 for control)
 capture drop gvar_cs
 generate gvar_cs = 0
 replace gvar_cs = pivotal_cohort if male == 1 & !missing(pivotal_cohort)
@@ -342,35 +342,5 @@ preserve
 		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
 		graphregion(color(white))
 restore
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
