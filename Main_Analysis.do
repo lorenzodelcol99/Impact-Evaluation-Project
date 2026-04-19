@@ -1,5 +1,5 @@
 // =========================================================
-// Impact Evaluation Project - Explanatory Analysis
+// Impact Evaluation Project - Main Analysis
 // Authors: Lorenzo and Sofia
 // =========================================================
 
@@ -26,9 +26,6 @@ use "$raw/ESS_ALL.dta", clear
 // =========================================================
 // --- 1.5 STRICT SAMPLE RESTRICTION ---
 // =========================================================
-// Manteniamo SOLO i 21 paesi trattati (Bove et al., 2022) 
-// E i paesi che hanno storicamente mantenuto la leva (Controlli Puri).
-// Nota: Stata supporta max 9 stringhe per ogni inlist(), quindi lo spezzettiamo.
 
 keep if ///
     inlist(cntry, "AL", "BE", "BG", "HR", "CZ", "FR", "DE", "HU", "IT") | ///
