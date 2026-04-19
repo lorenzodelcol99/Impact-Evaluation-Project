@@ -19,9 +19,22 @@ global root "."
 global raw "$root/ESS_Dataset/raw"
 global clean "$root/ESS_Dataset/clean"
 global Output "$root/Output"
-// Load the dataset
+
+// Load the pre-csv native dataset
 use "$raw/ESS_ALL.dta", clear
 
+// =========================================================
+// --- 1.5 STRICT SAMPLE RESTRICTION ---
+// =========================================================
+// Manteniamo SOLO i 21 paesi trattati (Bove et al., 2022) 
+// E i paesi che hanno storicamente mantenuto la leva (Controlli Puri).
+// Nota: Stata supporta max 9 stringhe per ogni inlist(), quindi lo spezzettiamo.
+
+keep if ///
+    inlist(cntry, "AL", "BE", "BG", "HR", "CZ", "FR", "DE", "HU", "IT") | ///
+    inlist(cntry, "LV", "LU", "MK", "NL", "PL", "PT", "RO", "SK", "SI") | ///
+    inlist(cntry, "ES", "SE", "GB", "AT", "CY", "DK", "EE", "FI", "GR") | ///
+    inlist(cntry, "NO", "CH", "RU", "TR")
 
 // =========================================================
 // --- 2. DATA CLEANING ---
@@ -92,7 +105,7 @@ replace pivotal_cohort = 1983 if cntry == "FR"
 replace pivotal_cohort = 1994 if cntry == "DE"
 replace pivotal_cohort = 1986 if cntry == "HU"
 replace pivotal_cohort = 1986 if cntry == "IT"
-replace pivotal_cohort = 1988 if cntry == "LT"
+replace pivotal_cohort = 1988 if cntry == "LV" 
 replace pivotal_cohort = 1948 if cntry == "LU"
 replace pivotal_cohort = 1988 if cntry == "MK"
 replace pivotal_cohort = 1979 if cntry == "NL"
@@ -115,7 +128,7 @@ replace dstnc_frm_pvtl_cohort = yrbrn - pivotal_cohort
 // =========================================================
 // --- 4. SAVE CLEANED DATASET ---
 // =========================================================
-save "$clean/ESS_ALL_clean.dta", replace
+save "$clean/ESS_clean.dta", replace
 
 
 // =========================================================
@@ -265,27 +278,6 @@ preserve
     
     graph export "$Output/Graph_Poland.png", replace
 restore
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
