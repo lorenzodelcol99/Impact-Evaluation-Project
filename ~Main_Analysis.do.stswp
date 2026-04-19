@@ -367,8 +367,6 @@ esttab using "$Output/Stargazer_Style_Table.rtf", replace ///
 
 // we should NOT include, 1) years of education of the respndent as it is endogenous with draft eligibility	2) Income/Employement, military service delayes the entry in the labour market, which affects lifelong earnings 3) Marital status, being drafted migth delay marriage 4) Current religioisty/ Political Affiliation
 // --> keep in mind that bad controls can typically be possibile alternatives dependent variables
-
-// GEMINI Suggest that, when we are adding COUNTRY and YEAR of BIRTH fixed effects we are controlling for everything that is constantly differenc between different countries and different generations (and that is a lot of stuff)
 	
 ////////// /////////// So what we should add as controls? /////////// /////////// 
 // I neeed the controls taht vary within a specific country AND whidin a specific birth cohord AND between man and women
@@ -436,44 +434,6 @@ reghdfe hmsacld i.male##i.post_treatment , absorb(cntry yrbrn) cluster(cntry)
 	
 
 
-//////////////////////////////////////////////////////////////////////////////////////
-////////////////   TESTING FOR PRE TRENDS --> TOWARDS EVENT STUDY     ////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-
-// now, we need to create the event time variable
-generate event_time = dstnc_frm_pvtl_cohort
-
-
-	
-	
-
-
-// ITALY
-// Trying --> freehms --> Gays and lesbians free to live life as they wish
-preserve
-	keep if cntry == "IT"
-	
-	// dropping missing values
-	drop if missing(freehms, dstnc_frm_pvtl_cohort, male)
-	
-	// zooming in a window of cohorts around the reform (1986)
-	keep if dstnc_frm_pvtl_cohort >= -36 & dstnc_frm_pvtl_cohort <= 17
-	
-	// calculate the average trust per birth year, separate by gender
-	collapse (mean) freehms, by(dstnc_frm_pvtl_cohort male)
-	
-	//Plot the DiD Graph
-	twoway ///
-		(line freehms dstnc_frm_pvtl_cohort if male == 1, lcolor(navy) lwidth(medthick)) ///
-		(line freehms dstnc_frm_pvtl_cohort if male == 0, lcolor(cranberry) lwidth(medthick)), ///
-		xline(0, lpattern(dash) lcolor(black) lwidth(thin)) /// (The reform line)
-		title("Gays and lesbians free to live life as they wish by Birth Cohort (Italy)") ///
-		subtitle("Dashed line = First cohort expemt from military service draft (1986)") ///
-		ytitle("Year of Birth") ///
-		legend(order(1 "Men (Treated)" 2 "Women (Control)") position(6) rows(1)) ///
-		graphregion(color(white))
-		
-restore
 
 // GERMANY
 // Trying --> freehms --> Gays and lesbians free to live life as they wish
@@ -501,72 +461,6 @@ preserve
 		graphregion(color(white))
 		
 restore
-
-
-
-// pensare a controlli che non debbano influenzare la variabile dipendente pre treatment
-
-
-/// GEMINI dice correttamente, If I use all the dataset, also countries wich never abolished the military service, I will have missing values in the "distance" from treatment varaible as these countries do not have the "pivotal cohort" (as already said, they never abolished the mandatory military service)
-// we need to think how to overcome to this problem if we go DDD
-
-// Dani Invece risponde --> il problema che segnali non c'è in un DDD. Puoi semplicemente usare un codice che ti dica:  gen post = year_birth >= pivotal_cohort if treated_country == 1
-// replace post = 0 if treated_country == 0
-
-// Pensare a event study graph
-
-// TRIPLE DID --> DDD
-// utilizzare il fatto che un paese abbia abolito o mai abolito la leva militare
-// Dummy che dice "abolished at a ceirtan time" vs "never abolished"
-// Dobbiamo pensare se questa assumptuon regarding the oarallel trend is to huge
-// stiamo dicendo che le differenze di trend, tra unomini e donne, prima della riforma sono comuni tra paesi che poi hanno effettuato la riforma e paesi che non l'hanno mai effettuata
-// Bisogna forse (il trattamento è la riforma), occhio a non inserire nel campione paesi che NON hanno MAI avuto la leva militare obbligatoria.
-
-
-// il problema che segnali non c'è in un DDD. Puoi semplicemente usare un codice che ti dica:  gen post = year_birth >= pivotal_cohort if treated_country == 1
-// replace post = 0 if treated_country == 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
